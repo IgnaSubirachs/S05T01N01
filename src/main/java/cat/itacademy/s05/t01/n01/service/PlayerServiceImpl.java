@@ -66,7 +66,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Flux<PlayerDTO>findByName(String name){
-        return playerRepository.finsByName(name)
+        return playerRepository.findByName(name)
                 .map(playerMapper::toDTO);
     }
 }
