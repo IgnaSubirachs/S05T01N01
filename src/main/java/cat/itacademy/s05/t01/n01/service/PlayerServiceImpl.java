@@ -48,4 +48,25 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findAll()
                 .map(playerMapper::toDTO);
     }
+
+
+    @Override
+    public Mono<PlayerDTO>getById(Long id){
+        return playerRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: "+id,404)))
+                .map(playerMapper::toDTO);
+    }
+
+    @Override
+    public Mono<Void> deleteById(Long id) {
+        return playerRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, 404)))
+                .flatMap(playerRepository::delete);
+    }
+
+    @Override
+    public Flux<PlayerDTO>findByName(String name){
+        return playerRepository.finsByName(name)
+                .map(playerMapper::toDTO);
+    }
 }

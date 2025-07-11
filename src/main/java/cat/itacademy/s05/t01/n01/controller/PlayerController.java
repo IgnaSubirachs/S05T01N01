@@ -22,9 +22,9 @@ public class PlayerController {
 
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Mono<PlayerDTO> createPlayer(@Valid @RequestBody PlayerDTO dto) {
-        return playerService.createPlayer(dto);
+    public Mono<ResponseEntity<PlayerDTO>> createPlayer(@Valid @RequestBody PlayerDTO dto) {
+        return playerService.createPlayer(dto)
+                .map(player -> ResponseEntity.status(HttpStatus.CREATED).body(player));
     }
 
 
@@ -37,8 +37,29 @@ public class PlayerController {
                 .map(ResponseEntity::ok);
     }
 
+
     @GetMapping
-    public Flux<PlayerDTO> getAllPlayers(){
+    public Flux<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers();
+    }
+
+
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<PlayerDTO>> getPlayerById(@PathVariable Long id) {
+        return playerService.getById(id)
+                .map(ResponseEntity::ok);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<Void>> deleteById(@PathVariable Long id) {
+        return playerService.deleteById(id)
+                .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+    @GetMapping("/search")
+    public Mono<PlayerDTO>findByName(@RequestParam String name){
+        return playerService.findByName(name);
+
     }
 }
