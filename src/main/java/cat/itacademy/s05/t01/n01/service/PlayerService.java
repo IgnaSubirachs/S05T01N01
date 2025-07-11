@@ -6,4 +6,5 @@ import reactor.core.publisher.Mono;
 
 public interface PlayerService {
     Mono<PlayerDTO> updatePlayerName(Long id, String newName);
+    Mono<PlayerDTO>createPlayer(PlayerDTO playerDTO);
 }
