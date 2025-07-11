@@ -1,16 +1,17 @@
 package cat.itacademy.s05.t01.n01.controller;
 
 import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
-import cat.itacademy.s05.t01.n01.dto.PlayerNameUpdateRequest;
 import cat.itacademy.s05.t01.n01.service.PlayerService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/player")
+@RequestMapping("/players")
 public class PlayerController {
 
     private final PlayerService playerService;
@@ -19,18 +20,25 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
-    @PutMapping
-    public Mono<ResponseEntity<PlayerDTO>> updateById(@PathVariable Long id, @Valid @RequestBody PlayerNameUpdateRequest request) {
 
-        return playerService.updatePlayerName(id, request.name())
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<PlayerDTO> createPlayer(@Valid @RequestBody PlayerDTO dto) {
+        return playerService.createPlayer(dto);
+    }
+
+
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<PlayerDTO>> updatePlayerName(
+            @PathVariable Long id,
+            @RequestParam @NotBlank String name
+    ) {
+        return playerService.updatePlayerName(id, name)
                 .map(ResponseEntity::ok);
-
-
-    }
-    @PostMapping("/player")
-    public Mono<ResponseEntity<PlayerDTO>> createPlayer(@Valid @RequestBody PlayerDTO playerDTO) {
-        return playerService.createPlayer(playerDTO)
-                .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved));
     }
 
+    @GetMapping
+    public Flux<PlayerDTO> getAllPlayers(){
+        return playerService.getAllPlayers();
+    }
 }
