@@ -58,7 +58,7 @@ public class PlayerController {
     }
 
     @GetMapping("/search")
-    public Mono<PlayerDTO>findByName(@RequestParam String name){
+    public Flux<PlayerDTO>findByName(@RequestParam String name){
         return playerService.findByName(name);
 
     }
