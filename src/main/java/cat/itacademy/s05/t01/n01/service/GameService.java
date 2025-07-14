@@ -12,4 +12,5 @@ public interface GameService {
     Flux<GameDTO> getAllGames();
     Mono<GameDTO> updateGame(String id, GameDTO gameDTO);
     Mono<Void> deleteGame(String id);
+    Mono<GameDTO>startGame(String gameId);
 }

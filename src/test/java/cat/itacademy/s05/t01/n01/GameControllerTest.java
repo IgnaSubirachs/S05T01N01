@@ -3,6 +3,7 @@ package cat.itacademy.s05.t01.n01;
 
 import cat.itacademy.s05.t01.n01.controller.GameController;
 import cat.itacademy.s05.t01.n01.dto.GameDTO;
+import cat.itacademy.s05.t01.n01.exception.ApiException;
 import cat.itacademy.s05.t01.n01.model.GameStatus;
 import cat.itacademy.s05.t01.n01.service.GameService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -124,4 +126,23 @@ public class GameControllerTest {
                 .exchange()
                 .expectStatus().isNoContent();
     }
+    @Test
+    void startGame_ReturnsGameStarted() {
+        String gameId = "abc123";
+
+        GameDTO response = new GameDTO(gameId, "1", GameStatus.PLAYING);
+
+        Mockito.when(gameService.startGame(gameId))
+                .thenReturn(Mono.just(response));
+
+        webTestClient.post()
+                .uri("/games/{id}/start", gameId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo("abc123")
+                .jsonPath("$.playerId").isEqualTo("1")
+                .jsonPath("$.status").isEqualTo("PLAYING");
+    }
+
 }

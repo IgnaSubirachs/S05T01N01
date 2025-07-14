@@ -6,10 +6,10 @@ import lombok.Getter;
 @Getter
 public class ApiException extends RuntimeException {
 
-    private final HttpStatus statusCode;
+    private final HttpStatus status;
 
     public ApiException(String message, HttpStatus statusCode) {
         super(message);
-        this.statusCode = statusCode;
+        this.status = statusCode;
     }
 }

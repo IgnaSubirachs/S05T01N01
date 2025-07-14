@@ -1,7 +1,6 @@
 package com.blackjack.exception;
 
 import cat.itacademy.s05.t01.n01.exception.ApiException;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,7 +26,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleApiException(ApiException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
-        return ResponseEntity.status(ex.getStatusCode()).body(response);
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
 
     @ExceptionHandler(Exception.class)
