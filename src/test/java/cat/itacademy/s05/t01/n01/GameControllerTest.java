@@ -4,6 +4,7 @@ package cat.itacademy.s05.t01.n01;
 import cat.itacademy.s05.t01.n01.controller.GameController;
 import cat.itacademy.s05.t01.n01.dto.GameDTO;
 import cat.itacademy.s05.t01.n01.exception.ApiException;
+import cat.itacademy.s05.t01.n01.logic.GameEngine;
 import cat.itacademy.s05.t01.n01.model.GameStatus;
 import cat.itacademy.s05.t01.n01.service.GameService;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,11 @@ public class GameControllerTest {
 
     @MockitoBean
     private GameService gameService;
+
+    @MockitoBean
+    private GameEngine gameEngine;
+
+
 
     @BeforeEach
     void resetMocks() {
@@ -144,5 +150,45 @@ public class GameControllerTest {
                 .jsonPath("$.playerId").isEqualTo("1")
                 .jsonPath("$.status").isEqualTo("PLAYING");
     }
+
+    @Test
+    void hitGame_ReturnsGameAfterHit() {
+        String gameId = "abc123";
+        GameDTO result = new GameDTO(gameId, "1", GameStatus.PLAYING);
+
+        Mockito.when(gameService.hit(gameId)).thenReturn(Mono.just(result));
+
+        webTestClient.put()
+                .uri("/games/{id}/hit", gameId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(gameId)
+                .jsonPath("$.playerId").isEqualTo("1")
+                .jsonPath("$.status").value(status ->
+                        org.assertj.core.api.Assertions.assertThat(status).isIn("PLAYING", "LOST"));
+    }
+
+    @Test
+    void standGame_ReturnsGameAfterStand() {
+        String gameId = "abc123";
+        GameDTO response = new GameDTO(gameId, "1", GameStatus.WON);
+
+        Mockito.when(gameService.stand(gameId))
+                .thenReturn(Mono.just(response));
+
+        webTestClient.put()
+                .uri("/games/{id}/stand", gameId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(gameId)
+                .jsonPath("$.playerId").isEqualTo("1")
+                .jsonPath("$.status").value(status ->
+                        org.assertj.core.api.Assertions.assertThat(status)
+                                .isIn("WON", "LOST", "DRAW"));
+    }
+
+
 
 }

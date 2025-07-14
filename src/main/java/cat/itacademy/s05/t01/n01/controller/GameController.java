@@ -57,5 +57,16 @@ public class GameController {
         return Mono.just(gameEngine.drawCard());
     }
 
+    @PutMapping("/{id}/hit")
+    public Mono<ResponseEntity<GameDTO>> hit(@PathVariable String id) {
+        return gameService.hit(id)
+                .map(ResponseEntity::ok);
+    }
+    @PutMapping("/{id}/stand")
+    public Mono<ResponseEntity<GameDTO>> stand(@PathVariable String id) {
+        return gameService.stand(id)
+                .map(ResponseEntity::ok);
+    }
+
 
 }

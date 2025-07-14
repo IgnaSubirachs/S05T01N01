@@ -2,31 +2,37 @@ package cat.itacademy.s05.t01.n01;
 
 import cat.itacademy.s05.t01.n01.logic.GameEngine;
 import cat.itacademy.s05.t01.n01.model.Card;
+import cat.itacademy.s05.t01.n01.model.Game;
 import cat.itacademy.s05.t01.n01.model.GameStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class GameEngineTest {
 
     private GameEngine gameEngine;
 
-     @BeforeEach
+    @BeforeEach
     void setUp() {
-         gameEngine = new GameEngine();
+        gameEngine = new GameEngine();
     }
 
     @Test
-    void drawCard_ReturnsValidCard(){
-         Card card = gameEngine.drawCard();
-         assertNotNull(card);
-         assertTrue(card.getValue()>=1 && card.getValue()<=11);
-         assertNotNull(card.getSuit());
-         assertNotNull(card.getRank());
+    void drawCard_ReturnsValidCard() {
+        Card card = gameEngine.drawCard();
+        assertNotNull(card);
+        assertTrue(card.getValue() >= 1 && card.getValue() <= 11);
+        assertNotNull(card.getSuit());
+        assertNotNull(card.getRank());
     }
+
     @Test
     void evaluateWinner_PlayerWins() {
         List<Card> player = List.of(new Card("X", "X", 10), new Card("X", "X", 5));
@@ -37,11 +43,11 @@ class GameEngineTest {
     }
 
     @Test
-    void evaluateWinner_DealerWins(){
+    void evaluateWinner_DealerWins() {
         List<Card> player = List.of(new Card("X", "X", 6));
         List<Card> dealer = List.of(new Card("X", "X", 10));
 
-        GameStatus result = gameEngine.evaluateWinner(player , dealer);
+        GameStatus result = gameEngine.evaluateWinner(player, dealer);
         assertEquals(GameStatus.LOST, result);
     }
 
@@ -70,6 +76,50 @@ class GameEngineTest {
 
         GameStatus result = gameEngine.evaluateWinner(player, dealer);
         assertEquals(GameStatus.WON, result);
+    }
+
+    @Test
+    void applyHit_shouldAddCardandRemainPlaying_whenPlayerValueIsUnder21() {
+        Game game = new Game();
+        game.setStatus(GameStatus.PLAYING);
+        game.setPlayerHand(new ArrayList<>());
+
+        game.getPlayerHand().add(new Card("Ten", "Hearts", 10));
+        Game result = gameEngine.applyHit(game);
+
+        assertEquals(GameStatus.PLAYING, result.getStatus());
+        assertEquals(2, result.getPlayerHand().size());
+        assertTrue(result.getPlayerHand().stream().mapToInt(Card::getValue).sum() <= 21);
+    }
+
+    @Test
+    void applyHit_shouldSetStatusToLost_whenPlayerValueExceeds21() {
+
+        Game game = new Game();
+        game.setStatus(GameStatus.PLAYING);
+        game.setPlayerHand(new ArrayList<>());
+
+        game.getPlayerHand().add(new Card("Ten", "Spades", 10));
+        game.getPlayerHand().add(new Card("Queen", "Clubs", 10));
+
+        Game result = gameEngine.applyHit(game);
+
+        int handValue = gameEngine.calculateHandValue(result.getPlayerHand());
+        assertTrue(handValue > 21);
+        assertEquals(GameStatus.LOST, result.getStatus());
+    }
+    @Test
+    void playDealerTurn_shouldDrawUntilSeventeen() {
+        GameEngine gameEngine = new GameEngine();
+
+        List<Card> dealerHand = new ArrayList<>();
+        dealerHand.add(new Card("Six", "Spades", 6));
+
+        List<Card> result = gameEngine.playerDealerTurn(dealerHand);
+
+        int total = gameEngine.calculateHandValue(result);
+
+        assertTrue(total >= 17);
     }
 }
 

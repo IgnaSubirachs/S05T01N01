@@ -1,9 +1,12 @@
 package cat.itacademy.s05.t01.n01.logic;
 
 
+import cat.itacademy.s05.t01.n01.dto.GameDTO;
 import cat.itacademy.s05.t01.n01.model.Card;
+import cat.itacademy.s05.t01.n01.model.Game;
 import cat.itacademy.s05.t01.n01.model.GameStatus;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Random;
@@ -31,5 +34,23 @@ public class GameEngine {
         if(playerScore >dealerScore) return GameStatus.WON;
         if(playerScore < dealerScore)return GameStatus.LOST;
         return GameStatus.DRAW;
+    }
+    public Game applyHit(Game game) {
+        Card newCard = drawCard();
+        game.getPlayerHand().add(newCard);
+
+        int playerValue = calculateHandValue(game.getPlayerHand());
+        if (playerValue > 21) {
+            game.setStatus(GameStatus.LOST);
+        }
+
+        return game;
+    }
+
+    public List<Card>playerDealerTurn(List<Card> dealerHand){
+        while (calculateHandValue(dealerHand)< 17){
+            dealerHand.add(drawCard());
+        }
+        return dealerHand;
     }
 }

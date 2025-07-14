@@ -13,4 +13,6 @@ public interface GameService {
     Mono<GameDTO> updateGame(String id, GameDTO gameDTO);
     Mono<Void> deleteGame(String id);
     Mono<GameDTO>startGame(String gameId);
+    Mono<GameDTO>hit(String gameId);
+    Mono<GameDTO>stand(String gameId);
 }

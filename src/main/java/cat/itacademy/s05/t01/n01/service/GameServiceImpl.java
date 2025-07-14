@@ -84,6 +84,39 @@ public class GameServiceImpl implements GameService {
                     return gameRepository.save(game).map(gameMapper::toDto);
                 });
     }
+    @Override
+    public Mono<GameDTO> hit(String gameId) {
+        return gameRepository.findById(gameId)
+                .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + gameId, HttpStatus.NOT_FOUND)))
+                .flatMap(game -> {
+                    if (game.getStatus() != GameStatus.PLAYING) {
+                        return Mono.error(new ApiException("Game is not in PLAYING state " + gameId, HttpStatus.BAD_REQUEST));
+                    }
+                    Game updatedGame = gameEngine.applyHit(game);
+
+                    return gameRepository.save(updatedGame)
+                            .map(gameMapper::toDto);
+                });
+    }
+    @Override
+    public Mono<GameDTO>stand(String gameId){
+        return gameRepository.findById(gameId)
+                .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + gameId, HttpStatus.NOT_FOUND)))
+                .flatMap(game ->{
+                    if(game.getStatus()!= GameStatus.PLAYING){
+                        return Mono.error(new ApiException("Game is not in PLAYING state", HttpStatus.BAD_REQUEST));
+                    }
+                    List<Card>updatedDealerHand = gameEngine.playerDealerTurn(game.getDealerHand());
+                    game.setDealerHand(updatedDealerHand);
+
+                    GameStatus result = gameEngine.evaluateWinner(game.getPlayerHand(),updatedDealerHand);
+                            game.setStatus(result);
+
+                    return gameRepository.save(game)
+                            .map(gameMapper::toDto);
+                });
+    }
+
 
 }
 
