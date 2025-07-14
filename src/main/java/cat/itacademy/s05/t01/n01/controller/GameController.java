@@ -20,8 +20,8 @@ public class GameController {
         return gameService.createGame(dto)
                 .map(ResponseEntity::ok);
     }
-    @GetMapping
-    public Mono<ResponseEntity<GameDTO>>getGameByUd(@PathVariable String id){
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<GameDTO>>getGameById(@PathVariable String id){
         return gameService.getGameById(id)
                 .map(ResponseEntity::ok);
     }
@@ -31,13 +31,13 @@ public class GameController {
         return gameService.getAllGames();
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     public Mono<ResponseEntity<GameDTO>>updateGame(@PathVariable String id, @RequestBody GameDTO dto){
         return gameService.updateGame(id, dto)
                 .map(ResponseEntity::ok);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>>deleteGame(@PathVariable String id){
         return gameService.deleteGame(id)
                 .thenReturn(ResponseEntity.noContent().build());
