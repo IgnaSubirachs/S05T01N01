@@ -1,6 +1,8 @@
 package cat.itacademy.s05.t01.n01.controller;
 
 import cat.itacademy.s05.t01.n01.dto.GameDTO;
+import cat.itacademy.s05.t01.n01.logic.GameEngine;
+import cat.itacademy.s05.t01.n01.model.Card;
 import cat.itacademy.s05.t01.n01.service.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import reactor.core.publisher.Mono;
 public class GameController {
 
     private final GameService gameService;
+    private final GameEngine gameEngine;
 
     @PostMapping
     public Mono<ResponseEntity<GameDTO>> createGame(@RequestBody GameDTO dto) {
@@ -48,5 +51,11 @@ public class GameController {
         return gameService.startGame(id)
                 .map(ResponseEntity::ok);
     }
+
+    @GetMapping("/draw")
+    public Mono<Card>drawCard(){
+        return Mono.just(gameEngine.drawCard());
+    }
+
 
 }
