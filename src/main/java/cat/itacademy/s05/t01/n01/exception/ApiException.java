@@ -1,14 +1,13 @@
 package cat.itacademy.s05.t01.n01.exception;
 
-public class ApiException extends RuntimeException {
-    private final int statusCode;
+import org.springframework.http.HttpStatus;
 
-    public ApiException(String message, int statusCode) {
+public class ApiException extends RuntimeException {
+    private final HttpStatus statusCode;
+
+    public ApiException(String message, HttpStatus statusCode) {
         super(message);
         this.statusCode = statusCode;
     }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
 }
+

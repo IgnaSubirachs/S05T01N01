@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Game {
-    private Long id;
+    private String id;
     private Long playerId;
     private List<Card>playerHand;
     private List<Card> dealerHand;
