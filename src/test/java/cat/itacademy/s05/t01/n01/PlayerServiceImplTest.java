@@ -19,12 +19,18 @@ public class PlayerServiceImplTest {
     private PlayerRepository playerRepository;
     private PlayerMapper playerMapper;
     private PlayerServiceImpl playerService;
+    private Player samplePlayer;
 
     @BeforeEach
     void setup(){
         playerRepository = mock(PlayerRepository.class);
         playerMapper = new PlayerMapper();
         playerService = new PlayerServiceImpl(playerRepository , playerMapper);
+        samplePlayer = Player.builder()
+                .id(1L)
+                .name("Ignasi")
+                .totalWins(12)
+                .build();
     }
 
     @Test
@@ -43,5 +49,33 @@ public class PlayerServiceImplTest {
                 .verifyComplete();
         verify(playerRepository, times (1)).save(any(Player.class));
 
+    }
+    @Test
+    void updatePlayerName_shouldUpdateNameIfExists() {
+
+        String newName = "NouNom";
+        Player updatedPlayer = Player.builder()
+                .id(1L)
+                .name(newName)
+                .totalWins(5)
+                .build();
+
+
+        when(playerRepository.findById(1L)).thenReturn(Mono.just(samplePlayer));
+
+
+        when(playerRepository.save(any(Player.class))).thenReturn(Mono.just(updatedPlayer));
+
+
+        Mono<PlayerDTO> resultMono = playerService.updatePlayerName(1L, newName);
+
+
+        StepVerifier.create(resultMono)
+                .expectNextMatches(dto ->
+                        dto.id().equals(1L)
+                                && dto.name().equals(newName)
+                                && dto.totalWins() == 5
+                )
+                .verifyComplete();
     }
 }
