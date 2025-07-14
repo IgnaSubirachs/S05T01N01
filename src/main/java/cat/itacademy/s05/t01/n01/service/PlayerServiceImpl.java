@@ -5,8 +5,8 @@ import cat.itacademy.s05.t01.n01.exception.ApiException;
 import cat.itacademy.s05.t01.n01.mapper.PlayerMapper;
 import cat.itacademy.s05.t01.n01.model.Player;
 import cat.itacademy.s05.t01.n01.repository.PlayerRepository;
-import cat.itacademy.s05.t01.n01.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,11 +31,10 @@ public class PlayerServiceImpl implements PlayerService {
                 .map(playerMapper::toDTO);
     }
 
-
     @Override
     public Mono<PlayerDTO> updatePlayerName(Long id, String newName) {
         return playerRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id,404)))
+                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, HttpStatus.NOT_FOUND)))
                 .flatMap(player -> {
                     player.setName(newName);
                     return playerRepository.save(player);
@@ -44,28 +43,27 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Flux<PlayerDTO> getAllPlayers(){
+    public Flux<PlayerDTO> getAllPlayers() {
         return playerRepository.findAll()
                 .map(playerMapper::toDTO);
     }
 
-
     @Override
-    public Mono<PlayerDTO>getById(Long id){
+    public Mono<PlayerDTO> getById(Long id) {
         return playerRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: "+id,404)))
+                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, HttpStatus.NOT_FOUND)))
                 .map(playerMapper::toDTO);
     }
 
     @Override
     public Mono<Void> deleteById(Long id) {
         return playerRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, 404)))
+                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, HttpStatus.NOT_FOUND)))
                 .flatMap(playerRepository::delete);
     }
 
     @Override
-    public Flux<PlayerDTO>findByName(String name){
+    public Flux<PlayerDTO> findByName(String name) {
         return playerRepository.findByName(name)
                 .map(playerMapper::toDTO);
     }

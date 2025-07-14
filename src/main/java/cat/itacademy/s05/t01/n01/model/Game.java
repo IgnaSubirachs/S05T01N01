@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Game {
     private String id;
-    private Long playerId;
+    private String playerId;
     private List<Card>playerHand;
     private List<Card> dealerHand;
     private GameStatus status;
