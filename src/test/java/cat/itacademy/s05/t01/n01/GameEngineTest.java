@@ -28,15 +28,21 @@ class GameEngineTest {
     void drawCard_ReturnsValidCard() {
         Card card = gameEngine.drawCard();
         assertNotNull(card);
-        assertTrue(card.getValue() >= 1 && card.getValue() <= 11);
         assertNotNull(card.getSuit());
         assertNotNull(card.getRank());
+
+        int value = card.getRank().getValue();
+        assertTrue(value >= 1 && value <= 11);
     }
 
     @Test
     void evaluateWinner_PlayerWins() {
-        List<Card> player = List.of(new Card("X", "X", 10), new Card("X", "X", 5));
-        List<Card> dealer = List.of(new Card("X", "X", 8), new Card("X", "X", 4));
+        List<Card> player = List.of(
+                new Card(Card.Suit.HEARTS, Card.Rank.EIGHT),
+                new Card(Card.Suit.SPADES, Card.Rank.SEVEN)); // 15
+        List<Card> dealer = List.of(
+                new Card(Card.Suit.CLUBS, Card.Rank.SIX),
+                new Card(Card.Suit.DIAMONDS, Card.Rank.FOUR)); // 10
 
         GameStatus result = gameEngine.evaluateWinner(player, dealer);
         assertEquals(GameStatus.WON, result);
@@ -44,8 +50,8 @@ class GameEngineTest {
 
     @Test
     void evaluateWinner_DealerWins() {
-        List<Card> player = List.of(new Card("X", "X", 6));
-        List<Card> dealer = List.of(new Card("X", "X", 10));
+        List<Card> player = List.of(new Card(Card.Suit.SPADES, Card.Rank.FIVE));
+        List<Card> dealer = List.of(new Card(Card.Suit.HEARTS, Card.Rank.TEN));
 
         GameStatus result = gameEngine.evaluateWinner(player, dealer);
         assertEquals(GameStatus.LOST, result);
@@ -53,8 +59,8 @@ class GameEngineTest {
 
     @Test
     void evaluateWinner_Draw() {
-        List<Card> player = List.of(new Card("X", "X", 9));
-        List<Card> dealer = List.of(new Card("X", "X", 9));
+        List<Card> player = List.of(new Card(Card.Suit.HEARTS, Card.Rank.NINE));
+        List<Card> dealer = List.of(new Card(Card.Suit.SPADES, Card.Rank.NINE));
 
         GameStatus result = gameEngine.evaluateWinner(player, dealer);
         assertEquals(GameStatus.DRAW, result);
@@ -62,8 +68,13 @@ class GameEngineTest {
 
     @Test
     void evaluateWinner_PlayerBusts() {
-        List<Card> player = List.of(new Card("X", "X", 10), new Card("X", "X", 8), new Card("X", "X", 5)); // 23
-        List<Card> dealer = List.of(new Card("X", "X", 7), new Card("X", "X", 5)); // 12
+        List<Card> player = List.of(
+                new Card(Card.Suit.HEARTS, Card.Rank.TEN),
+                new Card(Card.Suit.CLUBS, Card.Rank.EIGHT),
+                new Card(Card.Suit.DIAMONDS, Card.Rank.FIVE)); // 23
+        List<Card> dealer = List.of(
+                new Card(Card.Suit.SPADES, Card.Rank.SEVEN),
+                new Card(Card.Suit.HEARTS, Card.Rank.FIVE)); // 12
 
         GameStatus result = gameEngine.evaluateWinner(player, dealer);
         assertEquals(GameStatus.LOST, result);
@@ -71,36 +82,43 @@ class GameEngineTest {
 
     @Test
     void evaluateWinner_DealerBusts() {
-        List<Card> player = List.of(new Card("X", "X", 10), new Card("X", "X", 5)); // 15
-        List<Card> dealer = List.of(new Card("X", "X", 10), new Card("X", "X", 10), new Card("X", "X", 2)); // 22
+        List<Card> player = List.of(
+                new Card(Card.Suit.HEARTS, Card.Rank.TEN),
+                new Card(Card.Suit.SPADES, Card.Rank.FIVE)); // 15
+        List<Card> dealer = List.of(
+                new Card(Card.Suit.DIAMONDS, Card.Rank.TEN),
+                new Card(Card.Suit.CLUBS, Card.Rank.QUEEN),
+                new Card(Card.Suit.HEARTS, Card.Rank.TWO)); // 22
 
         GameStatus result = gameEngine.evaluateWinner(player, dealer);
         assertEquals(GameStatus.WON, result);
     }
 
     @Test
-    void applyHit_shouldAddCardandRemainPlaying_whenPlayerValueIsUnder21() {
+    void applyHit_shouldAddCardAndRemainPlaying_whenPlayerValueIsUnder21() {
         Game game = new Game();
         game.setStatus(GameStatus.PLAYING);
         game.setPlayerHand(new ArrayList<>());
 
-        game.getPlayerHand().add(new Card("Ten", "Hearts", 10));
+        game.getPlayerHand().add(new Card(Card.Suit.HEARTS, Card.Rank.TEN));
         Game result = gameEngine.applyHit(game);
 
         assertEquals(GameStatus.PLAYING, result.getStatus());
         assertEquals(2, result.getPlayerHand().size());
-        assertTrue(result.getPlayerHand().stream().mapToInt(Card::getValue).sum() <= 21);
+
+        int value = gameEngine.calculateHandValue(result.getPlayerHand());
+        assertTrue(value <= 21);
     }
 
     @Test
     void applyHit_shouldSetStatusToLost_whenPlayerValueExceeds21() {
-
         Game game = new Game();
         game.setStatus(GameStatus.PLAYING);
         game.setPlayerHand(new ArrayList<>());
 
-        game.getPlayerHand().add(new Card("Ten", "Spades", 10));
-        game.getPlayerHand().add(new Card("Queen", "Clubs", 10));
+        game.getPlayerHand().add(new Card(Card.Suit.HEARTS, Card.Rank.TEN));
+        game.getPlayerHand().add(new Card(Card.Suit.SPADES, Card.Rank.TEN));
+        game.getPlayerHand().add(new Card(Card.Suit.CLUBS, Card.Rank.TWO)); // 22
 
         Game result = gameEngine.applyHit(game);
 
@@ -108,19 +126,15 @@ class GameEngineTest {
         assertTrue(handValue > 21);
         assertEquals(GameStatus.LOST, result.getStatus());
     }
+
     @Test
     void playDealerTurn_shouldDrawUntilSeventeen() {
-        GameEngine gameEngine = new GameEngine();
-
         List<Card> dealerHand = new ArrayList<>();
-        dealerHand.add(new Card("Six", "Spades", 6));
+        dealerHand.add(new Card(Card.Suit.SPADES, Card.Rank.SIX)); // 6
 
         List<Card> result = gameEngine.playerDealerTurn(dealerHand);
 
         int total = gameEngine.calculateHandValue(result);
-
         assertTrue(total >= 17);
     }
 }
-
-

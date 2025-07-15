@@ -2,6 +2,12 @@ package cat.itacademy.s05.t01.n01.controller;
 
 import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
 import cat.itacademy.s05.t01.n01.service.PlayerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
@@ -12,6 +18,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/players")
+@Tag(name = "Player Controller", description = "Handles all operations related to players")
 public class PlayerController {
 
     private final PlayerService playerService;
@@ -20,14 +27,23 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
-
+    @Operation(summary = "Create a new player", description = "Creates a new player with the given name and returns it",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Player successfully created",
+                            content = @Content(schema = @Schema(implementation = PlayerDTO.class)))
+            })
     @PostMapping
-    public Mono<ResponseEntity<PlayerDTO>> createPlayer(@Valid @RequestBody PlayerDTO dto) {
+    public Mono<ResponseEntity<PlayerDTO>> createPlayer(@Valid @RequestBody(description = "Player to create", required = true)
+                                                        @org.springframework.web.bind.annotation.RequestBody PlayerDTO dto) {
         return playerService.createPlayer(dto)
                 .map(player -> ResponseEntity.status(HttpStatus.CREATED).body(player));
     }
 
-
+    @Operation(summary = "Update a player's name", description = "Updates the name of an existing player",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Player successfully updated",
+                            content = @Content(schema = @Schema(implementation = PlayerDTO.class)))
+            })
     @PutMapping("/{id}")
     public Mono<ResponseEntity<PlayerDTO>> updatePlayerName(
             @PathVariable Long id,
@@ -37,29 +53,44 @@ public class PlayerController {
                 .map(ResponseEntity::ok);
     }
 
-
+    @Operation(summary = "Get all players", description = "Returns a list of all players",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "List of players",
+                            content = @Content(schema = @Schema(implementation = PlayerDTO.class)))
+            })
     @GetMapping
     public Flux<PlayerDTO> getAllPlayers() {
         return playerService.getAllPlayers();
     }
 
-
+    @Operation(summary = "Get a player by ID", description = "Fetches a specific player by ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Player found",
+                            content = @Content(schema = @Schema(implementation = PlayerDTO.class)))
+            })
     @GetMapping("/{id}")
     public Mono<ResponseEntity<PlayerDTO>> getPlayerById(@PathVariable Long id) {
         return playerService.getById(id)
                 .map(ResponseEntity::ok);
     }
 
-
+    @Operation(summary = "Delete a player by ID", description = "Deletes a specific player",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Player successfully deleted")
+            })
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteById(@PathVariable Long id) {
         return playerService.deleteById(id)
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @Operation(summary = "Search players by name", description = "Finds players by matching name",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Matching players",
+                            content = @Content(schema = @Schema(implementation = PlayerDTO.class)))
+            })
     @GetMapping("/search")
-    public Flux<PlayerDTO>findByName(@RequestParam String name){
+    public Flux<PlayerDTO> findByName(@RequestParam String name) {
         return playerService.findByName(name);
-
     }
 }
