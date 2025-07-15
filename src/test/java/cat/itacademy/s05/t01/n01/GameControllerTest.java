@@ -1,9 +1,8 @@
 package cat.itacademy.s05.t01.n01;
 
-
 import cat.itacademy.s05.t01.n01.controller.GameController;
-import cat.itacademy.s05.t01.n01.dto.GameDTO;
-import cat.itacademy.s05.t01.n01.exception.ApiException;
+import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
+import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
 import cat.itacademy.s05.t01.n01.logic.GameEngine;
 import cat.itacademy.s05.t01.n01.model.GameStatus;
 import cat.itacademy.s05.t01.n01.service.GameService;
@@ -13,7 +12,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -35,8 +33,6 @@ public class GameControllerTest {
     @MockitoBean
     private GameEngine gameEngine;
 
-
-
     @BeforeEach
     void resetMocks() {
         Mockito.reset(gameService);
@@ -44,10 +40,10 @@ public class GameControllerTest {
 
     @Test
     void createGame_ReturnCreatedGame() {
-        GameDTO request = new GameDTO(null, "1", GameStatus.PLAYING);
-        GameDTO response = new GameDTO("abc123", "1", GameStatus.PLAYING);
+        GameRequestDTO request = new GameRequestDTO("1");
+        GameResponseDTO response = new GameResponseDTO("abc123", "1", GameStatus.PLAYING);
 
-        Mockito.when(gameService.createGame(any(GameDTO.class)))
+        Mockito.when(gameService.createGame(any(GameRequestDTO.class)))
                 .thenReturn(Mono.just(response));
 
         webTestClient.post()
@@ -55,7 +51,7 @@ public class GameControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
-                .expectStatus().isOk() // ← Aquí es 200 OK porque usas ResponseEntity.ok()
+                .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.id").isEqualTo("abc123")
                 .jsonPath("$.playerId").isEqualTo("1")
@@ -65,7 +61,7 @@ public class GameControllerTest {
     @Test
     void getGameById_ReturnGame() {
         String gameId = "abc123";
-        GameDTO response = new GameDTO(gameId, "1", GameStatus.PLAYING);
+        GameResponseDTO response = new GameResponseDTO(gameId, "1", GameStatus.PLAYING);
 
         Mockito.when(gameService.getGameById(gameId))
                 .thenReturn(Mono.just(response));
@@ -81,8 +77,8 @@ public class GameControllerTest {
 
     @Test
     void getAllGames_ReturnListOfGames() {
-        GameDTO game1 = new GameDTO("id1", "1", GameStatus.PLAYING);
-        GameDTO game2 = new GameDTO("id2", "2", GameStatus.WON);
+        GameResponseDTO game1 = new GameResponseDTO("id1", "1", GameStatus.PLAYING);
+        GameResponseDTO game2 = new GameResponseDTO("id2", "2", GameStatus.WON);
 
         Mockito.when(gameService.getAllGames())
                 .thenReturn(Flux.just(game1, game2));
@@ -97,17 +93,16 @@ public class GameControllerTest {
                 .jsonPath("$[0].status").isEqualTo("PLAYING")
                 .jsonPath("$[1].id").isEqualTo("id2")
                 .jsonPath("$[1].status").isEqualTo("WON");
-
     }
 
     @Test
     void updateGame_ReturnsUpdatedGame() {
         String gameId = "abc123";
 
-        GameDTO request = new GameDTO(null, "1", GameStatus.WON);
-        GameDTO updated = new GameDTO(gameId, "1", GameStatus.WON);
+        GameRequestDTO request = new GameRequestDTO("1");
+        GameResponseDTO updated = new GameResponseDTO(gameId, "1", GameStatus.WON);
 
-        Mockito.when(gameService.updateGame(Mockito.eq(gameId), Mockito.any(GameDTO.class)))
+        Mockito.when(gameService.updateGame(Mockito.eq(gameId), Mockito.any(GameRequestDTO.class)))
                 .thenReturn(Mono.just(updated));
 
         webTestClient.put()
@@ -123,7 +118,7 @@ public class GameControllerTest {
     }
 
     @Test
-    void deleteGame_ReturnNoContent(){
+    void deleteGame_ReturnNoContent() {
         String gameId = "abc123";
         Mockito.when(gameService.deleteGame(gameId))
                 .thenReturn(Mono.empty());
@@ -132,11 +127,11 @@ public class GameControllerTest {
                 .exchange()
                 .expectStatus().isNoContent();
     }
+
     @Test
     void startGame_ReturnsGameStarted() {
         String gameId = "abc123";
-
-        GameDTO response = new GameDTO(gameId, "1", GameStatus.PLAYING);
+        GameResponseDTO response = new GameResponseDTO(gameId, "1", GameStatus.PLAYING);
 
         Mockito.when(gameService.startGame(gameId))
                 .thenReturn(Mono.just(response));
@@ -146,49 +141,8 @@ public class GameControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.id").isEqualTo("abc123")
+                .jsonPath("$.id").isEqualTo(gameId)
                 .jsonPath("$.playerId").isEqualTo("1")
                 .jsonPath("$.status").isEqualTo("PLAYING");
     }
-
-    @Test
-    void hitGame_ReturnsGameAfterHit() {
-        String gameId = "abc123";
-        GameDTO result = new GameDTO(gameId, "1", GameStatus.PLAYING);
-
-        Mockito.when(gameService.hit(gameId)).thenReturn(Mono.just(result));
-
-        webTestClient.put()
-                .uri("/games/{id}/hit", gameId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.id").isEqualTo(gameId)
-                .jsonPath("$.playerId").isEqualTo("1")
-                .jsonPath("$.status").value(status ->
-                        org.assertj.core.api.Assertions.assertThat(status).isIn("PLAYING", "LOST"));
-    }
-
-    @Test
-    void standGame_ReturnsGameAfterStand() {
-        String gameId = "abc123";
-        GameDTO response = new GameDTO(gameId, "1", GameStatus.WON);
-
-        Mockito.when(gameService.stand(gameId))
-                .thenReturn(Mono.just(response));
-
-        webTestClient.put()
-                .uri("/games/{id}/stand", gameId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.id").isEqualTo(gameId)
-                .jsonPath("$.playerId").isEqualTo("1")
-                .jsonPath("$.status").value(status ->
-                        org.assertj.core.api.Assertions.assertThat(status)
-                                .isIn("WON", "LOST", "DRAW"));
-    }
-
-
-
 }

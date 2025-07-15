@@ -1,28 +1,24 @@
 package cat.itacademy.s05.t01.n01.mapper;
 
-import cat.itacademy.s05.t01.n01.dto.GameDTO;
-import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
+import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
+import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
 import cat.itacademy.s05.t01.n01.model.Game;
-import cat.itacademy.s05.t01.n01.model.Player;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GameMapper {
 
-    public GameDTO toDto(Game game) {
-        return new GameDTO(
+    public GameResponseDTO toResponseDto(Game game) {
+        return new GameResponseDTO(
                 game.getId(),
                 game.getPlayerId(),
                 game.getStatus()
         );
     }
 
-    public Game toEntity(GameDTO dto) {
+    public Game toEntity(GameRequestDTO requestDto) {
         Game game = new Game();
-        game.setId(dto.id());
-        game.setPlayerId(dto.playerId());
-        game.setStatus(dto.status());
+        game.setPlayerId(requestDto.playerId());
         return game;
     }
 }
-

@@ -1,18 +1,25 @@
 package cat.itacademy.s05.t01.n01.service;
 
-import cat.itacademy.s05.t01.n01.dto.GameDTO;
-import cat.itacademy.s05.t01.n01.model.Game;
+import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
+import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
 public interface GameService {
-    Mono<GameDTO> createGame(GameDTO gameDTO);
-    Mono<GameDTO> getGameById(String id);
-    Flux<GameDTO> getAllGames();
-    Mono<GameDTO> updateGame(String id, GameDTO gameDTO);
+
+    Mono<GameResponseDTO> createGame(GameRequestDTO gameRequestDTO);
+
+    Mono<GameResponseDTO> getGameById(String id);
+
+    Flux<GameResponseDTO> getAllGames();
+
+    Mono<GameResponseDTO> updateGame(String id, GameRequestDTO gameRequestDTO);
+
     Mono<Void> deleteGame(String id);
-    Mono<GameDTO>startGame(String gameId);
-    Mono<GameDTO>hit(String gameId);
-    Mono<GameDTO>stand(String gameId);
+
+    Mono<GameResponseDTO> startGame(String gameId);
+
+    Mono<GameResponseDTO> hit(String gameId);
+
+    Mono<GameResponseDTO> stand(String gameId);
 }
