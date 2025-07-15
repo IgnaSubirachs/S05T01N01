@@ -1,10 +1,10 @@
 package cat.itacademy.s05.t01.n01.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.*;
 
-@Entity
-@Table(name = "players")
+@Table("players")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,7 +13,6 @@ import lombok.*;
 public class Player {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
