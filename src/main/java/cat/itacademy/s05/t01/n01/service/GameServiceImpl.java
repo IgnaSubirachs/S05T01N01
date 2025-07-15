@@ -14,13 +14,17 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
 
+    private static final Logger log = LoggerFactory.getLogger(GameServiceImpl.class);
     private final GameRepository gameRepository;
     private final GameMapper gameMapper;
     private final GameEngine gameEngine;
@@ -30,7 +34,9 @@ public class GameServiceImpl implements GameService {
     public Mono<GameDTO> createGame(GameDTO dto) {
         Game game = gameMapper.toEntity(dto);
         return gameRepository.save(game)
-                .map(gameMapper::toDto);
+                .map(gameMapper::toDto)
+                .doOnSuccess(savedDto ->
+                log.debug("Game {} created successfully for player {}", savedDto.id(), savedDto.playerId()));
     }
 
     @Override
@@ -75,13 +81,24 @@ public class GameServiceImpl implements GameService {
                     List<Card> playerHand = Arrays.asList(gameEngine.drawCard(), gameEngine.drawCard());
                     List<Card> dealerHand = Arrays.asList(gameEngine.drawCard(), gameEngine.drawCard());
 
-                    GameStatus status = gameEngine.evaluateWinner(playerHand, dealerHand);
+                    game.setPlayerHand(new ArrayList<>(playerHand));
+                    game.setDealerHand(new ArrayList<>(dealerHand));
 
-                    game.setPlayerHand(playerHand);
-                    game.setDealerHand(dealerHand);
-                    game.setStatus(status);
+                    int playerValue = gameEngine.calculateHandValue(playerHand);
+                    int dealerValue = gameEngine.calculateHandValue(dealerHand);
 
-                    return gameRepository.save(game).map(gameMapper::toDto);
+                    if (playerValue == 21 && dealerValue == 21) {
+                        game.setStatus(GameStatus.DRAW);
+                    } else if (playerValue == 21) {
+                        game.setStatus(GameStatus.WON);
+                    } else if (dealerValue == 21) {
+                        game.setStatus(GameStatus.LOST);
+                    } else {
+                        game.setStatus(GameStatus.PLAYING);
+                    }
+
+                    return gameRepository.save(game)
+                            .map(gameMapper::toDto);
                 });
     }
     @Override
