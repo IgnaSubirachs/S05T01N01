@@ -4,7 +4,7 @@ spring:
     name: blackjack-api
 
   r2dbc:
-    url: r2dbc:mysql://localhost:3308/mydatabase
+    url: r2dbc:mysql://localhost:3308/blackjack_db
     username: ignasubirachs
     password: 1234A
 
