@@ -1,14 +1,15 @@
 package cat.itacademy.s05.t01.n01.service;
 
-import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
-import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
+import cat.itacademy.s05.t01.n01.dto.*;
 import cat.itacademy.s05.t01.n01.exception.ApiException;
 import cat.itacademy.s05.t01.n01.logic.GameEngine;
 import cat.itacademy.s05.t01.n01.mapper.GameMapper;
 import cat.itacademy.s05.t01.n01.model.Card;
 import cat.itacademy.s05.t01.n01.model.Game;
 import cat.itacademy.s05.t01.n01.model.GameStatus;
+import cat.itacademy.s05.t01.n01.model.Player;
 import cat.itacademy.s05.t01.n01.repository.GameRepository;
+import cat.itacademy.s05.t01.n01.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -30,15 +33,16 @@ public class GameServiceImpl implements GameService {
     private final GameRepository gameRepository;
     private final GameMapper gameMapper;
     private final GameEngine gameEngine;
+    private final PlayerRepository playerRepository;
 
     @Override
-    public Mono<GameResponseDTO> createGame(GameRequestDTO dto) {
-        Game game = gameMapper.toEntity(dto);
+    public Mono<GameResponseDTO> createGame(GameRequestDTO requestDto) {
+        Game game = gameMapper.toEntity(requestDto);
         game.setStatus(GameStatus.PLAYING);
         return gameRepository.save(game)
                 .map(gameMapper::toResponseDto)
                 .doOnSuccess(savedDto ->
-                        log.debug("Game {} created successfully for player {}", savedDto.id(), savedDto.playerId()));
+                        log.debug("Game {} created for player {}", savedDto.id(), savedDto.playerId()));
     }
 
     @Override
@@ -53,19 +57,19 @@ public class GameServiceImpl implements GameService {
     public Flux<GameResponseDTO> getAllGames() {
         return gameRepository.findAll()
                 .map(gameMapper::toResponseDto)
-                .doOnComplete(() -> log.debug("Finished retrieving all games"));
+                .doOnComplete(() -> log.debug("Retrieved all games"));
     }
 
     @Override
-    public Mono<GameResponseDTO> updateGame(String id, GameRequestDTO gameDTO) {
+    public Mono<GameResponseDTO> updateGame(String id, GameRequestDTO requestDto) {
         return gameRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + id, HttpStatus.NOT_FOUND)))
                 .flatMap(existing -> {
-                    existing.setPlayerId(gameDTO.playerId());
+                    existing.setPlayerId(requestDto.playerId());
                     return gameRepository.save(existing);
                 })
                 .map(gameMapper::toResponseDto)
-                .doOnSuccess(updated -> log.debug("Game {} updated successfully", updated.id()));
+                .doOnSuccess(dto -> log.debug("Game {} updated", dto.id()));
     }
 
     @Override
@@ -73,7 +77,7 @@ public class GameServiceImpl implements GameService {
         return gameRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + id, HttpStatus.NOT_FOUND)))
                 .flatMap(gameRepository::delete)
-                .doOnSuccess(unused -> log.debug("Game {} deleted successfully", id));
+                .doOnSuccess(unused -> log.debug("Game {} deleted", id));
     }
 
     @Override
@@ -136,5 +140,41 @@ public class GameServiceImpl implements GameService {
                     return gameRepository.save(game)
                             .map(gameMapper::toResponseDto);
                 });
+    }
+
+    @Override
+    public Mono<GameResponseDTO> play(String gameId, PlayRequestDTO playRequestDto) {
+        switch (playRequestDto.action().toUpperCase(Locale.ROOT)) {
+            case "START":
+                return startGame(gameId);
+            case "HIT":
+                return hit(gameId);
+            case "STAND":
+                return stand(gameId);
+            default:
+                return Mono.error(new ApiException("Invalid action: " + playRequestDto.action(), HttpStatus.BAD_REQUEST));
+        }
+    }
+
+    @Override
+    public Mono<PlayerUpdateDTO> updatePlayerName(Long playerId, PlayerUpdateDTO updateDto) {
+        return playerRepository.findById(playerId)
+                .switchIfEmpty(Mono.error(new ApiException("Player not found", HttpStatus.NOT_FOUND)))
+                .flatMap(player -> {
+                    player.setName(updateDto.newName());
+                    return playerRepository.save(player);
+                })
+                .map(updated -> new PlayerUpdateDTO(updated.getName()));
+    }
+
+    @Override
+    public Flux<PlayerRankingDTO> getRanking() {
+        return playerRepository.findAll()
+                .sort(Comparator.comparing(Player::getTotalWins).reversed())
+                .map(player -> new PlayerRankingDTO(
+                        player.getId(),
+                        player.getName(),
+                        player.getTotalWins()
+                ));
     }
 }

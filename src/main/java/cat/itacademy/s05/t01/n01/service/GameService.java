@@ -1,7 +1,6 @@
 package cat.itacademy.s05.t01.n01.service;
 
-import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
-import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
+import cat.itacademy.s05.t01.n01.dto.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,4 +21,12 @@ public interface GameService {
     Mono<GameResponseDTO> hit(String gameId);
 
     Mono<GameResponseDTO> stand(String gameId);
+
+    Mono<GameResponseDTO> play(String gameId, PlayRequestDTO playRequestDto);
+
+    Mono<PlayerUpdateDTO> updatePlayerName(Long playerId, PlayerUpdateDTO updateDto);
+
+    Flux<PlayerRankingDTO> getRanking();
 }
+
+
