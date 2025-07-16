@@ -5,6 +5,7 @@ import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
 import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
 import cat.itacademy.s05.t01.n01.dto.PlayerRankingDTO;
 import cat.itacademy.s05.t01.n01.logic.GameEngine;
+import cat.itacademy.s05.t01.n01.model.Card;
 import cat.itacademy.s05.t01.n01.model.GameStatus;
 import cat.itacademy.s05.t01.n01.service.GameService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -42,7 +45,7 @@ public class GameControllerTest {
     @Test
     void createGame_ReturnCreatedGame() {
         GameRequestDTO request = new GameRequestDTO("1");
-        GameResponseDTO response = new GameResponseDTO("abc123", "1", GameStatus.PLAYING);
+        GameResponseDTO response = new GameResponseDTO("abc123", "1", GameStatus.PLAYING, List.of(), List.of());
 
         Mockito.when(gameService.createGame(any(GameRequestDTO.class)))
                 .thenReturn(Mono.just(response));
@@ -62,7 +65,7 @@ public class GameControllerTest {
     @Test
     void getGameById_ReturnGame() {
         String gameId = "abc123";
-        GameResponseDTO response = new GameResponseDTO(gameId, "1", GameStatus.PLAYING);
+        GameResponseDTO response = new GameResponseDTO(gameId, "1", GameStatus.PLAYING, List.of(), List.of());
 
         Mockito.when(gameService.getGameById(gameId))
                 .thenReturn(Mono.just(response));
@@ -78,8 +81,8 @@ public class GameControllerTest {
 
     @Test
     void getAllGames_ReturnListOfGames() {
-        GameResponseDTO game1 = new GameResponseDTO("id1", "1", GameStatus.PLAYING);
-        GameResponseDTO game2 = new GameResponseDTO("id2", "2", GameStatus.WON);
+        GameResponseDTO game1 = new GameResponseDTO("id1", "1", GameStatus.PLAYING, List.of(), List.of());
+        GameResponseDTO game2 = new GameResponseDTO("id2", "2", GameStatus.WON, List.of(), List.of());
 
         Mockito.when(gameService.getAllGames())
                 .thenReturn(Flux.just(game1, game2));
@@ -101,7 +104,7 @@ public class GameControllerTest {
         String gameId = "abc123";
 
         GameRequestDTO request = new GameRequestDTO("1");
-        GameResponseDTO updated = new GameResponseDTO(gameId, "1", GameStatus.WON);
+        GameResponseDTO updated = new GameResponseDTO(gameId, "1", GameStatus.WON, List.of(), List.of());
 
         Mockito.when(gameService.updateGame(Mockito.eq(gameId), Mockito.any(GameRequestDTO.class)))
                 .thenReturn(Mono.just(updated));
@@ -132,7 +135,7 @@ public class GameControllerTest {
     @Test
     void startGame_ReturnsGameStarted() {
         String gameId = "abc123";
-        GameResponseDTO response = new GameResponseDTO(gameId, "1", GameStatus.PLAYING);
+        GameResponseDTO response = new GameResponseDTO(gameId, "1", GameStatus.PLAYING, List.of(), List.of());
 
         Mockito.when(gameService.startGame(gameId))
                 .thenReturn(Mono.just(response));
@@ -156,7 +159,7 @@ public class GameControllerTest {
                 .thenReturn(Flux.just(player1, player2));
 
         webTestClient.get()
-                .uri("/ranking")
+                .uri("/games/ranking")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()

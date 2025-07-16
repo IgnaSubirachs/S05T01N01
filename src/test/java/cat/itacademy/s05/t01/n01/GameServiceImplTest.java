@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -54,7 +55,12 @@ class GameServiceImplTest {
         gameEntity.setId(gameId);
         gameEntity.setPlayerId(gameRequest.playerId());
         gameEntity.setStatus(GameStatus.PLAYING);
-        gameResponse   = new GameResponseDTO(gameId, gameRequest.playerId(), GameStatus.PLAYING);
+        gameResponse   = new GameResponseDTO(  gameId,
+                gameRequest.playerId(),
+                GameStatus.PLAYING,
+                List.of(), // playerHand
+                List.of()  // dealerHand
+        );
     }
 
     @Test
