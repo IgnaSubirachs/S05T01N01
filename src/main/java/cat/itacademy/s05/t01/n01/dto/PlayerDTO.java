@@ -12,6 +12,9 @@ public record PlayerDTO(
         String name,
 
         @Schema(description = "Total number of games won by the player", example = "3")
-        int totalWins
+        int totalWins,
+
+        @Schema(description = "Win ratio (wins / total games played)", example = "0.42")
+        double winRatio
 
 ) {}

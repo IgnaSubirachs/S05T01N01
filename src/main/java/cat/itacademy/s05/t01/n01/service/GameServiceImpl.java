@@ -171,10 +171,22 @@ public class GameServiceImpl implements GameService {
     public Flux<PlayerRankingDTO> getRanking() {
         return playerRepository.findAll()
                 .sort(Comparator.comparing(Player::getTotalWins).reversed())
-                .map(player -> new PlayerRankingDTO(
-                        player.getId(),
-                        player.getName(),
-                        player.getTotalWins()
-                ));
+                .concatMap(player ->
+                        gameRepository.findAll()
+                                .filter(game -> game.getPlayerId().equals(player.getId().toString()))
+                                .count()
+                                .defaultIfEmpty(0L)
+                                .map(totalGames -> {
+                                    double ratio = totalGames > 0
+                                            ? (double) player.getTotalWins() / totalGames
+                                            : 0.0;
+                                    return new PlayerRankingDTO(
+                                            player.getId(),
+                                            player.getName(),
+                                            player.getTotalWins(),
+                                            ratio
+                                    );
+                                })
+                );
     }
 }

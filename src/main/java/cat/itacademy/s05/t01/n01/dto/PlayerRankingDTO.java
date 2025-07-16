@@ -2,7 +2,7 @@ package cat.itacademy.s05.t01.n01.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Response DTO for player ranking information")
+@Schema(description = "Response DTO for player ranking information with win ratio")
 public record PlayerRankingDTO(
 
         @Schema(description = "Unique identifier of the player", example = "1")
@@ -12,5 +12,9 @@ public record PlayerRankingDTO(
         String playerName,
 
         @Schema(description = "Number of games won by the player", example = "5")
-        int winCount
+        int winCount,
+
+        @Schema(description = "Win ratio (wins / total games played)", example = "0.42")
+        double winRatio
+
 ) {}
