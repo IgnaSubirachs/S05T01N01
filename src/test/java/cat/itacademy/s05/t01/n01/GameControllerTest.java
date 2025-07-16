@@ -3,6 +3,7 @@ package cat.itacademy.s05.t01.n01;
 import cat.itacademy.s05.t01.n01.controller.GameController;
 import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
 import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
+import cat.itacademy.s05.t01.n01.dto.PlayerRankingDTO;
 import cat.itacademy.s05.t01.n01.logic.GameEngine;
 import cat.itacademy.s05.t01.n01.model.GameStatus;
 import cat.itacademy.s05.t01.n01.service.GameService;
@@ -145,4 +146,29 @@ public class GameControllerTest {
                 .jsonPath("$.playerId").isEqualTo("1")
                 .jsonPath("$.status").isEqualTo("PLAYING");
     }
+
+    @Test
+    void getRanking_ReturnsOrderedRankingWithPositionAndRatio() {
+        PlayerRankingDTO player1 = new PlayerRankingDTO(1, 1L, "Alice", 5, 0.83);
+        PlayerRankingDTO player2 = new PlayerRankingDTO(2, 2L, "Bob", 3, 0.60);
+
+        Mockito.when(gameService.getRanking())
+                .thenReturn(Flux.just(player1, player2));
+
+        webTestClient.get()
+                .uri("/ranking")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.length()").isEqualTo(2)
+                .jsonPath("$[0].position").isEqualTo(1)
+                .jsonPath("$[0].playerName").isEqualTo("Alice")
+                .jsonPath("$[0].winCount").isEqualTo(5)
+                .jsonPath("$[0].winRatio").isEqualTo(0.83)
+                .jsonPath("$[1].position").isEqualTo(2)
+                .jsonPath("$[1].playerName").isEqualTo("Bob")
+                .jsonPath("$[1].winCount").isEqualTo(3)
+                .jsonPath("$[1].winRatio").isEqualTo(0.60);
+    }
+
 }

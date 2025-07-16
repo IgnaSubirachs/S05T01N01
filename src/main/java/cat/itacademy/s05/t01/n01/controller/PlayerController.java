@@ -59,9 +59,10 @@ public class PlayerController {
                             content = @Content(schema = @Schema(implementation = PlayerDTO.class)))
             })
     @GetMapping
-    public Flux<PlayerDTO> getAllPlayers() {
-        return playerService.getAllPlayers();
+    public Flux<PlayerDTO> getAllPlayers(@RequestParam(required = false) String name) {
+        return (name != null) ? playerService.findByName(name) : playerService.getAllPlayers();
     }
+
 
     @Operation(summary = "Get a player by ID", description = "Fetches a specific player by ID",
             responses = {
@@ -84,13 +85,4 @@ public class PlayerController {
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
-    @Operation(summary = "Search players by name", description = "Finds players by matching name",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Matching players",
-                            content = @Content(schema = @Schema(implementation = PlayerDTO.class)))
-            })
-    @GetMapping("/search")
-    public Flux<PlayerDTO> findByName(@RequestParam String name) {
-        return playerService.findByName(name);
-    }
 }
