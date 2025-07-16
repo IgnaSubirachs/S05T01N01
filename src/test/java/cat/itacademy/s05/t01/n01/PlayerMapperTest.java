@@ -29,6 +29,15 @@ public class PlayerMapperTest {
         assertEquals(5, entity.getTotalWins());
     }
 
+    @Test
+    void toDto_shouldMapEntityToDEOCorrectly(){
+        Player entity = new Player(1L,"Ignasi", 6);
+        PlayerDTO dto= playerMapper.toDTO(entity);
+
+        assertEquals(1L, dto.id());
+        assertEquals("Ignasi", dto.name());
+        assertEquals(6, dto.totalWins());
+    }
 
 
 }
