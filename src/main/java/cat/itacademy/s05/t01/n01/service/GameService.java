@@ -27,6 +27,8 @@ public interface GameService {
     Mono<PlayerUpdateDTO> updatePlayerName(Long playerId, PlayerUpdateDTO updateDto);
 
     Flux<PlayerRankingDTO> getRanking();
+
+    Mono<Long> countGamesByPlayerId(Long playerId);
 }
 
 

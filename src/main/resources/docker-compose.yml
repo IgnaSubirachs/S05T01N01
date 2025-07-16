@@ -16,6 +16,7 @@ services:
   mongo:
     image: mongo
     container_name: mongo-blackjack
+    restart : always
     ports:
       - "27018:27017"
     networks:

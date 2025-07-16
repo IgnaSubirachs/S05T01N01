@@ -171,22 +171,34 @@ public class GameServiceImpl implements GameService {
     public Flux<PlayerRankingDTO> getRanking() {
         return playerRepository.findAll()
                 .sort(Comparator.comparing(Player::getTotalWins).reversed())
-                .concatMap(player ->
-                        gameRepository.findAll()
-                                .filter(game -> game.getPlayerId().equals(player.getId().toString()))
-                                .count()
-                                .defaultIfEmpty(0L)
-                                .map(totalGames -> {
-                                    double ratio = totalGames > 0
-                                            ? (double) player.getTotalWins() / totalGames
-                                            : 0.0;
-                                    return new PlayerRankingDTO(
-                                            player.getId(),
-                                            player.getName(),
-                                            player.getTotalWins(),
-                                            ratio
-                                    );
-                                })
-                );
+                .index()
+                .concatMap(tuple -> {
+                    long index = tuple.getT1();
+                    Player player = tuple.getT2();
+
+                    return gameRepository.findAll()
+                            .filter(game -> game.getPlayerId().equals(player.getId().toString()))
+                            .count()
+                            .map(totalGames -> {
+                                double ratio = totalGames > 0
+                                        ? (double) player.getTotalWins() / totalGames
+                                        : 0.0;
+
+                                return new PlayerRankingDTO(
+                                        (int) index + 1,
+                                        player.getId(),
+                                        player.getName(),
+                                        player.getTotalWins(),
+                                        ratio
+                                );
+                            });
+                });
+    }
+
+    @Override
+    public Mono<Long> countGamesByPlayerId(Long playerId) {
+        return gameRepository.findAll()
+                .filter(game -> game.getPlayerId().equals(playerId.toString()))
+                .count();
     }
 }

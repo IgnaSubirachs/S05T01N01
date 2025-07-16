@@ -2,6 +2,7 @@ package cat.itacademy.s05.t01.n01.controller;
 
 import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
 import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
+import cat.itacademy.s05.t01.n01.dto.PlayerRankingDTO;
 import cat.itacademy.s05.t01.n01.logic.GameEngine;
 import cat.itacademy.s05.t01.n01.model.Card;
 import cat.itacademy.s05.t01.n01.service.GameService;
@@ -103,5 +104,10 @@ public class GameController {
     public Mono<ResponseEntity<GameResponseDTO>> stand(@PathVariable String id) {
         return gameService.stand(id)
                 .map(ResponseEntity::ok);
+    }
+    @Operation(summary = "Ranking", description = "Global Ranking of the BlackJack players")
+    @GetMapping("/ranking")
+    public Flux<PlayerRankingDTO> getRanking() {
+        return gameService.getRanking();
     }
 }

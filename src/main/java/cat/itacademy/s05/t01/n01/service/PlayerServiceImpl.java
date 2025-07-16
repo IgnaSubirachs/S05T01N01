@@ -16,11 +16,15 @@ public class PlayerServiceImpl implements PlayerService {
 
     private final PlayerRepository playerRepository;
     private final PlayerMapper playerMapper;
+    private final GameService gameService;
 
     @Autowired
-    public PlayerServiceImpl(PlayerRepository playerRepository, PlayerMapper playerMapper) {
+    public PlayerServiceImpl(PlayerRepository playerRepository,
+                             PlayerMapper playerMapper,
+                             GameService gameService) {
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
+        this.gameService = gameService;
     }
 
     @Override
@@ -52,7 +56,14 @@ public class PlayerServiceImpl implements PlayerService {
     public Mono<PlayerDTO> getById(Long id) {
         return playerRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, HttpStatus.NOT_FOUND)))
-                .map(playerMapper::toDTO);
+                .flatMap(player -> gameService.countGamesByPlayerId(player.getId())
+                        .map(totalGames -> {
+                            double winRatio = totalGames > 0
+                                    ? (double) player.getTotalWins() / totalGames
+                                    : 0.0;
+                            return playerMapper.toDTO(player, winRatio);
+                        })
+                );
     }
 
     @Override
