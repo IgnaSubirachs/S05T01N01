@@ -2,19 +2,20 @@ spring:
   application:
     name: blackjack-api
 
-    r2dbc:
-      url: r2dbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}
-      username: ${MYSQL_USER}
-      password: ${MYSQL_PASSWORD}
+  r2dbc:
+    url: r2dbc:mysql://localhost:3309/blackjack_db
+    username: ignasubirachs
+    password: 1234A
 
   data:
     mongodb:
-      uri: ${MONGO_URI}
+      uri: mongodb://localhost:27018/blackjack
 
   main:
     allow-bean-definition-overriding: true
 
 server:
+  port: 8080
   error:
     include-message: always
 
@@ -26,5 +27,5 @@ springdoc:
 
 info:
   title: Blackjack API
-  description: API
+  description: Reactive Blackjack API using Spring WebFlux, MongoDB and MySQL (R2DBC)
   version: 1.0.0
