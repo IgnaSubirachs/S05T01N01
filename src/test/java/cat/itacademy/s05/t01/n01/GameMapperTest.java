@@ -1,5 +1,6 @@
 package cat.itacademy.s05.t01.n01;
 
+import cat.itacademy.s05.t01.n01.dto.GameRequestDTO;
 import cat.itacademy.s05.t01.n01.dto.GameResponseDTO;
 import cat.itacademy.s05.t01.n01.mapper.GameMapper;
 import cat.itacademy.s05.t01.n01.model.Card;
@@ -41,5 +42,14 @@ class GameMapperTest {
         assertEquals(GameStatus.WON, dto.status());
         assertEquals(playerHand, dto.playerHand());
         assertEquals(dealerHand, dto.dealerHand());
+    }
+
+    @Test
+    void toEntity_ShouldSetIdAsNull_WhenMappingFromRequestDTO() {
+        GameRequestDTO dto = new GameRequestDTO("123");
+
+        Game game = mapper.toEntity(dto);
+
+        assertNull(game.getId(), "The id should be null when creating a new Game from request DTO");
     }
 }
