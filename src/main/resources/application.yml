@@ -3,7 +3,7 @@ spring:
     name: blackjack-api
 
   r2dbc:
-    url: ${MYSQL_URL}
+    url: ${MYSQL_R2DBC_URL}
     username: ${MYSQLUSER}
     password: ${MYSQLPASSWORD}
 
