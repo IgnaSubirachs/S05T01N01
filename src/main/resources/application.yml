@@ -2,10 +2,10 @@ spring:
   application:
     name: blackjack-api
 
-  r2dbc:
-    url: ${MYSQL_R2DBC_URL}
-    username: ${MYSQLUSER}
-    password: ${MYSQLPASSWORD}
+    r2dbc:
+      url: r2dbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}
+      username: ${MYSQL_USER}
+      password: ${MYSQL_PASSWORD}
 
   data:
     mongodb:
