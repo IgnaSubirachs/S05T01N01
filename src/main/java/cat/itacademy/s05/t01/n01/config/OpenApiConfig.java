@@ -18,8 +18,8 @@ import org.springframework.context.annotation.Configuration;
         ),
         servers = {
                 @Server(
-                        url = "https://blackjackapi-ignasisubirachs.onrender.com",
-                        description = "Render Server"
+                        url = "http://localhost:8080",
+                        description = "Localhost"
                 )
         }
 )

@@ -15,7 +15,6 @@ spring:
     allow-bean-definition-overriding: true
 
 server:
-  port: 8080
   error:
     include-message: always
 
@@ -27,5 +26,5 @@ springdoc:
 
 info:
   title: Blackjack API
-  description: Reactive Blackjack API using Spring WebFlux, MongoDB and MySQL (R2DBC)
+  description: Reactive REST API for Blackjack
   version: 1.0.0
