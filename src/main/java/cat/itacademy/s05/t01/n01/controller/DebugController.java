@@ -13,7 +13,7 @@ public class DebugController {
 
     @GetMapping("/swagger-config")
     public Mono<String> getSwaggerConfig() {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("META-INF/resources/swagger-ui/swagger-config.yaml");
+        InputStream is = getClass().getClassLoader().getResourceAsStream("static/swagger-config.yaml");
         if (is == null) {
             return Mono.just("❌ not founded to JAR");
         }
