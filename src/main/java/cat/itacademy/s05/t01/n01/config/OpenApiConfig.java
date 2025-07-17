@@ -13,18 +13,17 @@ import org.springframework.context.annotation.Configuration;
                 title = "Blackjack API - Spring WebFlux",
                 version = "1.0.0",
                 description = "Reactive REST API for playing Blackjack. Connects MongoDB and MySQL using R2DBC and Spring WebFlux.",
-                contact = @Contact(
-                        name = "Ignasi Subirachs",
-                        email = "ignasubirachs@gmail.com",
-                        url = "https://github.com/IgnaSubirachs"
-                ),
-                license = @License(name = "MIT License", url = "https://opensource.org/licenses/MIT")
+                contact = @Contact(name = "Ignasi Subirachs"),
+                license = @License(name = "MIT License")
         ),
         servers = {
-                @Server(url = "https://blackjackapi-ignasisubirachs.onrender.com", description = "Render Deployment"),
-                @Server(url = "http://localhost:8080", description = "Local server")
+                @Server(
+                        url = "https://blackjackapi-ignasisubirachs.onrender.com",
+                        description = "Render Server"
+                )
         }
 )
+
 public class OpenApiConfig {
 
 }
