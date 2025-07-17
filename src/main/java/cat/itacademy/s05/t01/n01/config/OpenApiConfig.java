@@ -21,7 +21,8 @@ import org.springframework.context.annotation.Configuration;
                 license = @License(name = "MIT License", url = "https://opensource.org/licenses/MIT")
         ),
         servers = {
-                @Server(url = "http://localhost:8080", description = "Local server")
+                @Server(url = "http://localhost:8080", description = "Local server"),
+                @Server(url = "https://blackjackapi-ignasisubirachs.onrender.com", description = "Render Deployment")
         }
 )
 public class OpenApiConfig {

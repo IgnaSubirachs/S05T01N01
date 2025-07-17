@@ -96,13 +96,6 @@ This project is deployed on Render and accessible publicly at:
 
 👉 [https://blackjackapi-ignasisubirachs.onrender.com](https://blackjackapi-ignasisubirachs.onrender.com)
 
-## 💡 Future Improvements
-
-- ♻️ Implement full **deck shuffle & persistence** per game.
-- 🪙 Add `Reward` and `Ticket` logic for players.
-- 📈 Store game statistics and trends.
-
----
 
 ## 🤝 Author
 
