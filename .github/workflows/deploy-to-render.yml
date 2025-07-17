@@ -34,4 +34,4 @@ jobs:
 
       - name: Deploy to Render service
         run: |
-          render services deploy BlackJack-IgnasiSubirachs
+          render services deploy blackjackapi--ignasisubirachs
