@@ -3,13 +3,13 @@ spring:
     name: blackjack-api
 
   r2dbc:
-    url: r2dbc:mysql://localhost:3309/blackjack_db
+    url: r2dbc:mysql://mysql-blackjack:3306/blackjack_db
     username: ignasubirachs
     password: 1234A
 
   data:
     mongodb:
-      uri: mongodb://localhost:27018/blackjack
+      uri: mongodb://mongo-blackjack:27017/blackjack
 
   main:
     allow-bean-definition-overriding: true
