@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 @Schema(description = "Request DTO for creating a new player")
 public record PlayerRequestDTO(
 
-        //@NotBlank
+        @NotBlank
         @Schema(description = "Name of the player", example = "Ignasi")
         String name
 

@@ -30,16 +30,13 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Mono<PlayerDTO> createPlayer(PlayerRequestDTO dto) {
-        if (dto.name() == null || dto.name().isBlank()) {
-            throw new ApiException("Player name must be provided", HttpStatus.BAD_REQUEST);//MAL!!!
-        }
+        Player player = Player.builder()
+                .name(dto.name())
+                .totalWins(0)
+                .build();
 
-        Player player = playerMapper.toEntity(dto);
-        System.out.println("Creating player with name: " + player.getName());
-
-        return playerRepository
-                .save(player)
-                .map(playerMapper::toDTO);
+        return playerRepository.save(player)
+                .map(saved -> new PlayerDTO(saved.getId(), saved.getName(), saved.getTotalWins(), 0.0));
     }
 
     @Override

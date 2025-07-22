@@ -39,6 +39,8 @@ class GameServiceImplTest {
     @Mock
     private GameEngine gameEngine;
 
+
+
     @InjectMocks
     private GameServiceImpl service;
 
@@ -65,6 +67,13 @@ class GameServiceImplTest {
 
     @Test
     void createGame_shouldReturnResponseDto() {
+        Player mockPlayer = Player.builder()
+                .id(playerId)
+                .name("Ignasi")
+                .totalWins(0)
+                .build();
+
+        when(playerRepository.findById(playerId)).thenReturn(Mono.just(mockPlayer));
         when(gameMapper.toEntity(gameRequest)).thenReturn(gameEntity);
         when(gameRepository.save(gameEntity)).thenReturn(Mono.just(gameEntity));
         when(gameMapper.toResponseDto(gameEntity)).thenReturn(gameResponse);
@@ -73,12 +82,12 @@ class GameServiceImplTest {
                 .expectNext(gameResponse)
                 .verifyComplete();
 
+        verify(playerRepository, times(1)).findById(playerId);
         verify(gameRepository, times(1)).save(gameEntity);
     }
 
     @Test
     void updatePlayerName_shouldReturnUpdatedDto() {
-        // prepare existing Player in MySQL
         Player existing = new Player();
         existing.setId(playerId);
         existing.setName("OldName");

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -37,12 +38,19 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Mono<GameResponseDTO> createGame(GameRequestDTO requestDto) {
-        Game game = gameMapper.toEntity(requestDto);
-        game.setStatus(GameStatus.PLAYING);
-        return gameRepository.save(game)
-                .map(gameMapper::toResponseDto)
-                .doOnSuccess(savedDto ->
-                        log.debug("Game {} created for player {}", savedDto.id(), savedDto.playerId()));
+        String playerId = requestDto.playerId(); // ja és String
+
+        return playerRepository.findById(Long.valueOf(playerId))
+                .switchIfEmpty(Mono.error(new ApiException("Player not found with ID: " + playerId, HttpStatus.NOT_FOUND)))
+                .flatMap(player -> {
+                    Game game = gameMapper.toEntity(requestDto);
+                    game.setStatus(GameStatus.PLAYING);
+
+                    return gameRepository.save(game)
+                            .map(gameMapper::toResponseDto)
+                            .doOnSuccess(savedDto ->
+                                    log.debug("Game {} created for player {}", savedDto.id(), savedDto.playerId()));
+                });
     }
 
     @Override
@@ -81,15 +89,20 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Mono<GameResponseDTO> startGame(String id) {
-        return gameRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + id, HttpStatus.NOT_FOUND)))
-                .flatMap(game -> {
+    public Mono<GameResponseDTO> startGame(String playerId) {
+        return playerRepository.findById(Long.valueOf(playerId))
+                .switchIfEmpty(Mono.error(new ApiException("Player not found with ID: " + playerId, HttpStatus.NOT_FOUND)))
+                .flatMap(player -> {
                     List<Card> playerHand = Arrays.asList(gameEngine.drawCard(), gameEngine.drawCard());
                     List<Card> dealerHand = Arrays.asList(gameEngine.drawCard(), gameEngine.drawCard());
 
-                    game.setPlayerHand(new ArrayList<>(playerHand));
-                    game.setDealerHand(new ArrayList<>(dealerHand));
+                    Game game = Game.builder()
+                            .playerId(String.valueOf(player.getId()))
+                            .playerHand(new ArrayList<>(playerHand))
+                            .dealerHand(new ArrayList<>(dealerHand))
+                            .createdAt(LocalDate.now())
+                            .status(GameStatus.PLAYING)
+                            .build();
 
                     int playerValue = gameEngine.calculateHandValue(playerHand);
                     int dealerValue = gameEngine.calculateHandValue(dealerHand);
@@ -100,14 +113,13 @@ public class GameServiceImpl implements GameService {
                         game.setStatus(GameStatus.WON);
                     } else if (dealerValue == 21) {
                         game.setStatus(GameStatus.LOST);
-                    } else {
-                        game.setStatus(GameStatus.PLAYING);
                     }
 
                     return gameRepository.save(game)
                             .map(gameMapper::toResponseDto);
                 });
     }
+
 
     @Override
     public Mono<GameResponseDTO> hit(String gameId) {

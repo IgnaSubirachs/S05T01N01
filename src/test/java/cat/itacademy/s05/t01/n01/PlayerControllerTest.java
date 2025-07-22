@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,18 +36,25 @@ public class PlayerControllerTest {
 
 
     @Test
-    void createPlayer_ReturnNewPlayer(){
-        Mockito.when(playerService.createPlayer(new PlayerRequestDTO("Ignasi")))
-                .thenReturn(Mono.just(player));
+    void createPlayer_ReturnNewPlayer() {
+        PlayerRequestDTO requestDTO = new PlayerRequestDTO("Ignasi");
+        PlayerDTO responseDTO = new PlayerDTO(1L, "Ignasi", 10, 0.66);
+
+        Mockito.when(playerService.createPlayer(Mockito.any()))
+                .thenReturn(Mono.just(responseDTO));
 
         webTestClient.post()
                 .uri("/players")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
                 .exchange()
-                //.expectStatus().isCreated()
+                .expectStatus().isCreated()
+                .expectHeader().contentTypeCompatibleWith("application/json")
                 .expectBody()
-                .jsonPath("$.length()").isEqualTo(1)
-                .jsonPath("$[0].id").isEqualTo(1)
-                .jsonPath("$[0].name").isEqualTo("Ignasi");
+                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.name").isEqualTo("Ignasi")
+                .jsonPath("$.totalWins").isEqualTo(10)
+                .jsonPath("$.winRatio").isEqualTo(0.66);
     }
 
     @Test
