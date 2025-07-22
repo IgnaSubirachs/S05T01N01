@@ -1,10 +1,21 @@
-HELP.md
+# ---------------------------
+# Maven build directories
+# ---------------------------
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+*.log
+*.jar
+HELP.md
 
-### STS ###
+# Exclou el JAR de Maven Wrapper (es genera sol)
+.mvn/wrapper/maven-wrapper.jar
+
+# Manté la resta de la carpeta .mvn
+!.mvn/wrapper/maven-wrapper.properties
+!.mvn/wrapper/maven-wrapper-download.properties
+
+# ---------------------------
+# STS (Spring Tool Suite)
+# ---------------------------
 .apt_generated
 .classpath
 .factorypath
@@ -13,13 +24,17 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
+# ---------------------------
+# IntelliJ IDEA
+# ---------------------------
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# ---------------------------
+# NetBeans
+# ---------------------------
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -29,5 +44,24 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# ---------------------------
+# VS Code
+# ---------------------------
 .vscode/
+
+# ---------------------------
+# OS Metadata
+# ---------------------------
+.DS_Store
+Thumbs.db
+
+# ---------------------------
+# Docker related (KEEP Dockerfile & compose)
+# ---------------------------
+# No s'exclou res per docker aquí, perquè volem mantenir els fitxers relacionats
+
+# ---------------------------
+# Java wrappers (KEEP!)
+# ---------------------------
+!mvnw
+!mvnw.cmd
