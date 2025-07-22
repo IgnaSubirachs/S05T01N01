@@ -14,6 +14,7 @@ This is part of a final bootcamp sprint focused on reactive programming, clean a
 - 🧪 **JUnit 5**, **Mockito**, **StepVerifier**
 - 📄 **OpenAPI/Swagger UI** for live documentation
 - 🧰 **Lombok**, **MapStruct**, and **Validation API**
+- 🐳 **Docker** for containerization
 
 ---
 
@@ -73,6 +74,9 @@ src/
 ├── logic/ # Blackjack game engine logic
 └── exception/ # Global error handling
 
+yaml
+Copiar
+Editar
 
 ---
 
@@ -90,20 +94,24 @@ All core components are covered with unit and integration tests:
 
 ---
 
-## 🔗 Deployment
+## 🐳 Dockerization (Level 2)
 
-This project is deployed on Render and accessible publicly at:
+The application is fully dockerized for local execution and testing.
 
-👉 [https://blackjackapi-ignasisubirachs.onrender.com](https://blackjackapi-ignasisubirachs.onrender.com)
-
-
-## 🤝 Author
-
-Made with care  by **Ignasi Subirachs** . 
-
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
+### 🔧 Build Docker Image
+```bash
+docker build -t blackjack-api .
+▶️ Run the Container
+bash
+Copiar
+Editar
+docker run -p 8080:8080 blackjack-api
+📦 Push to Docker Hub (Optional)
+bash
+Copiar
+Editar
+docker tag blackjack-api ignasisubirachs/blackjack-api:latest
+docker login
+docker push ignasisubirachs/blackjack-api:latest
+👉 Docker Hub Repo:
+https://hub.docker.com/repository/docker/ignasisubirachs/blackjack-api
