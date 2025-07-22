@@ -2,6 +2,7 @@ package cat.itacademy.s05.t01.n01.service;
 
 import cat.itacademy.s05.t01.n01.dto.*;
 import cat.itacademy.s05.t01.n01.exception.ApiException;
+import cat.itacademy.s05.t01.n01.exception.ErrorCode;
 import cat.itacademy.s05.t01.n01.logic.GameEngine;
 import cat.itacademy.s05.t01.n01.mapper.GameMapper;
 import cat.itacademy.s05.t01.n01.model.Card;
@@ -19,11 +20,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +35,10 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Mono<GameResponseDTO> createGame(GameRequestDTO requestDto) {
-        String playerId = requestDto.playerId(); // ja és String
+        String playerId = requestDto.playerId();
 
         return playerRepository.findById(Long.valueOf(playerId))
-                .switchIfEmpty(Mono.error(new ApiException("Player not found with ID: " + playerId, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.PLAYER_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(player -> {
                     Game game = gameMapper.toEntity(requestDto);
                     game.setStatus(GameStatus.PLAYING);
@@ -56,7 +53,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public Mono<GameResponseDTO> getGameById(String id) {
         return gameRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Game not found", HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.GAME_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .map(gameMapper::toResponseDto)
                 .doOnSuccess(dto -> log.debug("Game {} retrieved", dto.id()));
     }
@@ -71,7 +68,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public Mono<GameResponseDTO> updateGame(String id, GameRequestDTO requestDto) {
         return gameRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + id, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.GAME_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(existing -> {
                     existing.setPlayerId(requestDto.playerId());
                     return gameRepository.save(existing);
@@ -83,7 +80,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public Mono<Void> deleteGame(String id) {
         return gameRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + id, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.GAME_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(gameRepository::delete)
                 .doOnSuccess(unused -> log.debug("Game {} deleted", id));
     }
@@ -91,7 +88,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public Mono<GameResponseDTO> startGame(String playerId) {
         return playerRepository.findById(Long.valueOf(playerId))
-                .switchIfEmpty(Mono.error(new ApiException("Player not found with ID: " + playerId, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.PLAYER_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(player -> {
                     List<Card> playerHand = Arrays.asList(gameEngine.drawCard(), gameEngine.drawCard());
                     List<Card> dealerHand = Arrays.asList(gameEngine.drawCard(), gameEngine.drawCard());
@@ -120,14 +117,13 @@ public class GameServiceImpl implements GameService {
                 });
     }
 
-
     @Override
     public Mono<GameResponseDTO> hit(String gameId) {
         return gameRepository.findById(gameId)
-                .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + gameId, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.GAME_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(game -> {
                     if (game.getStatus() != GameStatus.PLAYING) {
-                        return Mono.error(new ApiException("Game is not in PLAYING state", HttpStatus.BAD_REQUEST));
+                        return Mono.error(new ApiException(ErrorCode.INVALID_GAME_STATE, HttpStatus.BAD_REQUEST));
                     }
                     Game updatedGame = gameEngine.applyHit(game);
                     return gameRepository.save(updatedGame)
@@ -138,10 +134,10 @@ public class GameServiceImpl implements GameService {
     @Override
     public Mono<GameResponseDTO> stand(String gameId) {
         return gameRepository.findById(gameId)
-                .switchIfEmpty(Mono.error(new ApiException("Game not found with id: " + gameId, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.GAME_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(game -> {
                     if (game.getStatus() != GameStatus.PLAYING) {
-                        return Mono.error(new ApiException("Game is not in PLAYING state", HttpStatus.BAD_REQUEST));
+                        return Mono.error(new ApiException(ErrorCode.INVALID_GAME_STATE, HttpStatus.BAD_REQUEST));
                     }
                     List<Card> updatedDealerHand = gameEngine.playerDealerTurn(game.getDealerHand());
                     game.setDealerHand(updatedDealerHand);
@@ -164,14 +160,14 @@ public class GameServiceImpl implements GameService {
             case "STAND":
                 return stand(gameId);
             default:
-                return Mono.error(new ApiException("Invalid action: " + playRequestDto.action(), HttpStatus.BAD_REQUEST));
+                return Mono.error(new ApiException(ErrorCode.INVALID_ACTION, HttpStatus.BAD_REQUEST));
         }
     }
 
     @Override
     public Mono<PlayerUpdateDTO> updatePlayerName(Long playerId, PlayerUpdateDTO updateDto) {
         return playerRepository.findById(playerId)
-                .switchIfEmpty(Mono.error(new ApiException("Player not found", HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.PLAYER_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(player -> {
                     player.setName(updateDto.newName());
                     return playerRepository.save(player);

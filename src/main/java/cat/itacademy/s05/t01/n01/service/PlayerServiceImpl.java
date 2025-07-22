@@ -3,6 +3,7 @@ package cat.itacademy.s05.t01.n01.service;
 import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
 import cat.itacademy.s05.t01.n01.dto.PlayerRequestDTO;
 import cat.itacademy.s05.t01.n01.exception.ApiException;
+import cat.itacademy.s05.t01.n01.exception.ErrorCode;
 import cat.itacademy.s05.t01.n01.mapper.PlayerMapper;
 import cat.itacademy.s05.t01.n01.model.Player;
 import cat.itacademy.s05.t01.n01.repository.PlayerRepository;
@@ -42,7 +43,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Mono<PlayerDTO> updatePlayerName(Long id, String newName) {
         return playerRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.PLAYER_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(player -> {
                     player.setName(newName);
                     return playerRepository.save(player);
@@ -59,7 +60,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Mono<PlayerDTO> getById(Long id) {
         return playerRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.PLAYER_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(player -> gameService.countGamesByPlayerId(player.getId())
                         .map(totalGames -> {
                             double winRatio = totalGames > 0
@@ -73,7 +74,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Mono<Void> deleteById(Long id) {
         return playerRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ApiException("Player not found with id: " + id, HttpStatus.NOT_FOUND)))
+                .switchIfEmpty(Mono.error(new ApiException(ErrorCode.PLAYER_NOT_FOUND, HttpStatus.NOT_FOUND)))
                 .flatMap(playerRepository::delete);
     }
 
