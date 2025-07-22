@@ -2,6 +2,7 @@ package cat.itacademy.s05.t01.n01;
 
 
 import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
+import cat.itacademy.s05.t01.n01.dto.PlayerRequestDTO;
 import cat.itacademy.s05.t01.n01.mapper.PlayerMapper;
 import cat.itacademy.s05.t01.n01.model.Player;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class PlayerMapperTest {
@@ -20,13 +22,12 @@ public class PlayerMapperTest {
         playerMapper = new PlayerMapper();
     }
     @Test
-    void toEntity_shouldMapDTOToEntityCorrectly(){
-        PlayerDTO dto = new PlayerDTO(1L,"Ignasi", 5,0.75);
+    void toEntity_shouldMapRequestDTOToEntityCorrectly() {
+        PlayerRequestDTO dto = new PlayerRequestDTO("Ignasi");
         Player entity = playerMapper.toEntity(dto);
-
-        assertEquals(1L, entity.getId());
+        assertNull(entity.getId());
         assertEquals("Ignasi", entity.getName());
-        assertEquals(5, entity.getTotalWins());
+        assertEquals(0, entity.getTotalWins());
     }
 
     @Test

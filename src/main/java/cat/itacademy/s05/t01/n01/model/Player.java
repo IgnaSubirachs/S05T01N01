@@ -1,21 +1,25 @@
-package cat.itacademy.s05.t01.n01.model;
+    package cat.itacademy.s05.t01.n01.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
-import lombok.*;
+    import org.springframework.data.annotation.Id;
+    import org.springframework.data.relational.core.mapping.Column;
+    import org.springframework.data.relational.core.mapping.Table;
+    import lombok.*;
 
-@Table("players")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Player {
+    @Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Table("players")
+    public class Player {
 
-    @Id
-    private Long id;
+        @Id
+        private Long id;
 
-    private String name;
+        @Column("name")
+        private String name;
 
-    private int totalWins;
-}
+        @Builder.Default
+        @Column("total_wins")
+        private int totalWins = 0;
+
+    }

@@ -1,6 +1,7 @@
 package cat.itacademy.s05.t01.n01;
 
 import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
+import cat.itacademy.s05.t01.n01.dto.PlayerRequestDTO;
 import cat.itacademy.s05.t01.n01.mapper.PlayerMapper;
 import cat.itacademy.s05.t01.n01.model.Player;
 import cat.itacademy.s05.t01.n01.repository.PlayerRepository;
@@ -41,10 +42,11 @@ public class PlayerServiceImplTest {
 
     @Test
     void testCreatePlayer_returnSavedPlayerDTO() {
-        PlayerDTO inputDTO = new PlayerDTO(null, "Ignasi", 0, 0.0);  // <-- amb ratio
+        PlayerRequestDTO inputDTO = new PlayerRequestDTO("Ignasi");
         Player savedPlayer = new Player(1L, "Ignasi", 0);
 
-        when(playerRepository.save(any(Player.class))).thenReturn(Mono.just(savedPlayer));
+        when(playerRepository.save(any(Player.class)))
+                .thenReturn(Mono.just(savedPlayer));
 
         Mono<PlayerDTO> result = playerService.createPlayer(inputDTO);
 
@@ -59,6 +61,7 @@ public class PlayerServiceImplTest {
 
         verify(playerRepository, times(1)).save(any(Player.class));
     }
+
 
     @Test
     void updatePlayerName_shouldUpdateNameIfExists() {

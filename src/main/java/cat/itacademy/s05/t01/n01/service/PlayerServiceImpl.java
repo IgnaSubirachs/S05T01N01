@@ -1,6 +1,7 @@
 package cat.itacademy.s05.t01.n01.service;
 
 import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
+import cat.itacademy.s05.t01.n01.dto.PlayerRequestDTO;
 import cat.itacademy.s05.t01.n01.exception.ApiException;
 import cat.itacademy.s05.t01.n01.mapper.PlayerMapper;
 import cat.itacademy.s05.t01.n01.model.Player;
@@ -28,8 +29,14 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Mono<PlayerDTO> createPlayer(PlayerDTO dto) {
+    public Mono<PlayerDTO> createPlayer(PlayerRequestDTO dto) {
+        if (dto.name() == null || dto.name().isBlank()) {
+            throw new ApiException("Player name must be provided", HttpStatus.BAD_REQUEST);//MAL!!!
+        }
+
         Player player = playerMapper.toEntity(dto);
+        System.out.println("Creating player with name: " + player.getName());
+
         return playerRepository
                 .save(player)
                 .map(playerMapper::toDTO);

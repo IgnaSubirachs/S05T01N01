@@ -1,6 +1,7 @@
 package cat.itacademy.s05.t01.n01.controller;
 
 import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
+import cat.itacademy.s05.t01.n01.dto.PlayerRequestDTO;
 import cat.itacademy.s05.t01.n01.service.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,9 +13,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 
 @RestController
 @RequestMapping("/players")
@@ -33,8 +36,11 @@ public class PlayerController {
                             content = @Content(schema = @Schema(implementation = PlayerDTO.class)))
             })
     @PostMapping
-    public Mono<ResponseEntity<PlayerDTO>> createPlayer(@Valid @RequestBody(description = "Player to create", required = true)
-                                                        @org.springframework.web.bind.annotation.RequestBody PlayerDTO dto) {
+    public Mono<ResponseEntity<PlayerDTO>> createPlayer(@RequestBody PlayerRequestDTO dto)
+
+    {
+        System.out.println("Received PlayerRequestDTO: " + dto);
+
         return playerService.createPlayer(dto)
                 .map(player -> ResponseEntity.status(HttpStatus.CREATED).body(player));
     }

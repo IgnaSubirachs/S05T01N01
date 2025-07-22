@@ -3,18 +3,16 @@ spring:
     name: blackjack-api
 
   r2dbc:
-    url: r2dbc:mysql://mysql-blackjack:3306/blackjack_db
-    username: ignasubirachs
-    password: 1234A
+    url: ${SPRING_R2DBC_URL:r2dbc:mysql://localhost:3306/blackjack}
+    username: ${SPRING_R2DBC_USERNAME:root}
+    password: ${SPRING_R2DBC_PASSWORD:root}
 
   data:
     mongodb:
-      uri: mongodb://mongo-blackjack:27017/blackjack
-
-  main:
-    allow-bean-definition-overriding: true
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/blackjack}
 
 server:
+  port: 8080
   error:
     include-message: always
 

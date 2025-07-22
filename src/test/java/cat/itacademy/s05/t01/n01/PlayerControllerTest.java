@@ -2,6 +2,7 @@ package cat.itacademy.s05.t01.n01;
 
 import cat.itacademy.s05.t01.n01.controller.PlayerController;
 import cat.itacademy.s05.t01.n01.dto.PlayerDTO;
+import cat.itacademy.s05.t01.n01.dto.PlayerRequestDTO;
 import cat.itacademy.s05.t01.n01.service.PlayerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,22 @@ public class PlayerControllerTest {
     @BeforeEach
     void setUp() {
         player = new PlayerDTO(1L, "Ignasi", 10, 0.66);
+    }
+
+
+    @Test
+    void createPlayer_ReturnNewPlayer(){
+        Mockito.when(playerService.createPlayer(new PlayerRequestDTO("Ignasi")))
+                .thenReturn(Mono.just(player));
+
+        webTestClient.post()
+                .uri("/players")
+                .exchange()
+                //.expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.length()").isEqualTo(1)
+                .jsonPath("$[0].id").isEqualTo(1)
+                .jsonPath("$[0].name").isEqualTo("Ignasi");
     }
 
     @Test

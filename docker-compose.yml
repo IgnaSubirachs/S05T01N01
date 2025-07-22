@@ -1,40 +1,49 @@
-version: "3.8"
+version: '3.8'
 
 services:
+  mysql-db:
+    image: mysql:8
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: blackjack
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - backend-network
+
+  mongo-db:
+    image: mongo:6
+    container_name: mongo-db
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: blackjack
+    ports:
+      - "27017:27017"
+    networks:
+      - backend-network
+
   blackjack-api:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: blackjack-api
     depends_on:
-      - mysql
-      - mongo
+      - mysql-db
+      - mongo-db
     ports:
       - "8080:8080"
-    networks:
-      - blackjack-network
-
-  mysql:
-    image: mysql:8.0
-    container_name: mysql-blackjack
-    ports:
-      - "3309:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: 1234A
-      MYSQL_DATABASE: blackjack_db
-      MYSQL_USER: ignasubirachs
-      MYSQL_PASSWORD: 1234A
+      SPRING_R2DBC_URL: r2dbc:mysql://mysql-db:3306/blackjack
+      SPRING_R2DBC_USERNAME: root
+      SPRING_R2DBC_PASSWORD: root
+      SPRING_DATA_MONGODB_URI: mongodb://mongo-db:27017/blackjack
     networks:
-      - blackjack-network
-
-  mongo:
-    image: mongo
-    container_name: mongo-blackjack
-    ports:
-      - "27018:27017"
-    networks:
-      - blackjack-network
+      - backend-network
 
 networks:
-  blackjack-network:
+  backend-network:
     driver: bridge
