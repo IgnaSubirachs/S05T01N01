@@ -13,7 +13,7 @@ This is part of a final bootcamp sprint focused on reactive programming, clean a
 - 🗃️ **Reactive MySQL (R2DBC)** for `Player`, `Reward`, and `Ticket`
 - 🧪 **JUnit 5**, **Mockito**, **StepVerifier**
 - 📄 **OpenAPI/Swagger UI** for live documentation
-- 🧰 **Lombok**, **MapStruct**, and **Validation API**
+- 🧰 **Lombok** and **Validation API**
 - 🐳 **Docker** for containerization
 
 ---
